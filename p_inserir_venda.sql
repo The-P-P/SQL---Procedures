@@ -8,6 +8,7 @@ begin
     declare vItens int;
     declare vNumeroNota int;
     declare vContator int default 1;
+    declare vNumItensNota int;
     select max(numero) + 1 into vNumeroNota from notas_fiscais;
     set vCliente = f_cliente_aleatorio();
     set vVendedor = f_vendedor_aleatorio();
@@ -17,9 +18,14 @@ begin
     WHILE vContator <= vItens
     DO
         set vProduto = f_produto_aleatorio();
-        set vQUantidade = f_numero_aleatiorio(10, max_quantidade);
-        select PRECO_DE_LISTA into vPreco from tabela_de_produtos where CODIGO_DO_PRODUTO = vProduto;
-        insert into itens_notas_fiscais(NUMERO, CODIGO_DO_PRODUTO, QUATIDADE, PRECO) values (vNumeroNota, vProduto, vQUantidade, vPreco);
+        select count(*) into vNumItensNota from itens_notas_fiscais
+        where numero = vNumeroNota and CODIGO_DO_PRODUTO = vProduto;
+        if vNumItensNota = 0 then 
+            set vQUantidade = f_numero_aleatiorio(10, max_quantidade);
+            select PRECO_DE_LISTA into vPreco from tabela_de_produtos where CODIGO_DO_PRODUTO = vProduto;
+            insert into itens_notas_fiscais(NUMERO, CODIGO_DO_PRODUTO, QUATIDADE, PRECO) 
+            values (vNumeroNota, vProduto, vQUantidade, vPreco);
+        end if    
         set vContator = vContator + 1;
     END WHILE;
 return vRetorno;
